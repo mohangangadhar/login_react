@@ -1,13 +1,7 @@
-.login {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 50px;
-}
-.cardcontent {
-  display: flex;
-  flex-direction: column;
-}
-.actions {
-  justify-content: center;
+
+.cropped1 {
+  width: 300px; /* width of container */
+  height: 200px; /* height of container */
+  object-fit: cover;
+  border: 5px ;
 }
