@@ -9,7 +9,7 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import ButtonAppBar from "./BAppBar";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 const theme = createTheme();
 let coupon;
@@ -18,27 +18,39 @@ let but;
 export default function VerifyCoupon() {
 
     const [books, setBooks] = useState(null);
+    const [valid, setValid] = useState(false);
 
     const onCouponChange = (event) => {
         coupon = event.target.value;
         console.log(coupon);
     }
+
     async function getData() {
         // const response = await fetch("https://www.anapioficeandfire.com/api/books");
         // const data = await res.json();
 
         // store the data into our books variable
-        setBooks("Available") ;
+        setBooks("Available");
     }
 
     const handleSubmit = (event) => {
         event.preventDefault();
         console.log(coupon);
+        setBooks(null);
         // call lambda to check coupon status and report
-        if (coupon === "aa") {
-            but = "redeem";
-        }
-        getData().then(r => console.log(r));
+        const requestOptions = {
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'}
+        };
+
+        fetch('https://9p9gnbqc2j.execute-api.ap-south-1.amazonaws.com/siveals-read-order?id=SIV1603538220&vendor=PizzaHut', requestOptions)
+            .then(response => response.json())
+            .then(data => {
+                    console.log(data);
+                    data.valid ? setBooks("Available") : setBooks("Redeemed");
+                    setValid(data.valid)
+                }
+            );
     };
 
     return (
@@ -83,11 +95,13 @@ export default function VerifyCoupon() {
                                     > Redeem </Button>
                                 </Grid>
                             </Grid>
-                            {books === "Redeemed" && <Button fullWidth variant={'contained'} color='error' sx={{mt: 3, mb: 2}}>
+                            {books === "Redeemed" &&
+                            <Button fullWidth variant={'contained'} color='error' sx={{mt: 3, mb: 2}}>
                                 {books}
                             </Button>
                             }
-                            {books === "Available" && <Button fullWidth variant={'contained'} color='success' sx={{mt: 3, mb: 2}}>
+                            {books === "Available" &&
+                            <Button fullWidth variant={'contained'} color='success' sx={{mt: 3, mb: 2}}>
                                 {books}
                             </Button>
                             }
