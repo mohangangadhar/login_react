@@ -13,12 +13,12 @@ import {useEffect, useState} from "react";
 
 const theme = createTheme();
 let coupon;
-let but;
 
 export default function VerifyCoupon() {
 
     const [books, setBooks] = useState(null);
     const [valid, setValid] = useState(false);
+    let invalidCoupon = false;
 
     const onCouponChange = (event) => {
         coupon = event.target.value;
@@ -43,12 +43,16 @@ export default function VerifyCoupon() {
             headers: {'Content-Type': 'application/json'}
         };
 
-        fetch('https://9p9gnbqc2j.execute-api.ap-south-1.amazonaws.com/siveals-read-order?id='+coupon+'&vendor=PizzaHut', requestOptions)
+        fetch('https://9p9gnbqc2j.execute-api.ap-south-1.amazonaws.com/siveals-read-order?id=' + coupon + '&vendor=PizzaHut', requestOptions)
             .then(response => response.json())
             .then(data => {
-                    console.log(data);
-                    data.valid ? setBooks("Available") : setBooks("Redeemed");
-                    setValid(data.valid)
+                    if (data.resp === "Invalid Coupon!") {
+                        invalidCoupon = true;
+                        setBooks("Invalid");
+                    } else {
+                        data.valid ? setBooks("Available") : setBooks("Redeemed");
+                        setValid(data.valid)
+                    }
                 }
             );
     };
@@ -103,6 +107,11 @@ export default function VerifyCoupon() {
                             {books === "Available" &&
                             <Button fullWidth variant={'contained'} color='success' sx={{mt: 3, mb: 2}}>
                                 {books}
+                            </Button>
+                            }
+                            {books === "Invalid" &&
+                            <Button fullWidth variant={'contained'} color='error' sx={{mt: 3, mb: 2}}>
+                                Invalid Coupon
                             </Button>
                             }
                         </Box>
