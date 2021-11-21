@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {signInWithEmailAndPassword} from "../firebase"
+import {auth, signInWithEmailAndPassword} from "../firebase"
 import {createTheme} from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Grid from "@mui/material/Grid";
@@ -10,27 +10,23 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import ButtonAppBar from "./BAppBar";
 import {useEffect, useState} from "react";
+import {useAuthState} from "react-firebase-hooks/auth";
 
 const theme = createTheme();
 let coupon;
 
 export default function VerifyCoupon() {
-
+    const [user] = useAuthState(auth);
     const [books, setBooks] = useState(null);
     const [valid, setValid] = useState(false);
     let invalidCoupon = false;
 
     const onCouponChange = (event) => {
         coupon = event.target.value;
-        console.log(coupon);
     }
 
-    async function getData() {
-        // const response = await fetch("https://www.anapioficeandfire.com/api/books");
-        // const data = await res.json();
+    const handleRedeem = () => {
 
-        // store the data into our books variable
-        setBooks("Available");
     }
 
     const handleSubmit = (event) => {
@@ -43,7 +39,7 @@ export default function VerifyCoupon() {
             headers: {'Content-Type': 'application/json'}
         };
 
-        fetch('https://9p9gnbqc2j.execute-api.ap-south-1.amazonaws.com/siveals-read-order?id=' + coupon + '&vendor=PizzaHut', requestOptions)
+        fetch('https://9p9gnbqc2j.execute-api.ap-south-1.amazonaws.com/siveals-read-order?id=' + coupon + '&vendor=' + user.email, requestOptions)
             .then(response => response.json())
             .then(data => {
                     if (data.resp === "Invalid Coupon!") {
@@ -60,7 +56,7 @@ export default function VerifyCoupon() {
     return (
         <ThemeProvider theme={theme}>
             <ButtonAppBar/>
-            <Grid container component="main" sx={{height: '100vh', width: '100vh', mt: 10}}>
+            <Grid container component="main" sx={{height: '100vh', mt: 10}}>
                 <CssBaseline/>
                 <Grid item square>
                     <Box sx={{
@@ -96,6 +92,7 @@ export default function VerifyCoupon() {
                                     <Button type="submit"
                                             variant="contained"
                                             sx={{mt: 3, mb: 2}}
+                                            onClick={handleRedeem}
                                     > Redeem </Button>
                                 </Grid>
                             </Grid>
