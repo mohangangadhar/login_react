@@ -11,6 +11,10 @@ import Button from "@mui/material/Button";
 import ButtonAppBar from "./BAppBar";
 import {useEffect, useState} from "react";
 import {useAuthState} from "react-firebase-hooks/auth";
+import {useConfirm} from 'material-ui-confirm';
+import {ConfirmProvider} from 'material-ui-confirm';
+import AlertDialog from "./AlertDialog";
+
 
 const theme = createTheme();
 let coupon;
@@ -18,30 +22,51 @@ let coupon;
 export default function VerifyCoupon() {
     const [user] = useAuthState(auth);
     const [books, setBooks] = useState(null);
+    const [open, setOpen] = useState(false);
+    const [co, setCo] = useState("");
+    const [info, setInfo] = useState({});
     const [valid, setValid] = useState(false);
+    const [verify, setVerify] = useState(false);
     let invalidCoupon = false;
 
     const onCouponChange = (event) => {
         coupon = event.target.value;
-    }
-
-    const handleRedeem = () => {
-
-    }
-
-    const handleSubmit = (event) => {
-        event.preventDefault();
         console.log(coupon);
-        setBooks(null);
-        // call lambda to check coupon status and report
-        const requestOptions = {
-            method: 'GET',
-            headers: {'Content-Type': 'application/json'}
-        };
+        setCo(coupon);
+    }
 
-        fetch('https://9p9gnbqc2j.execute-api.ap-south-1.amazonaws.com/siveals-read-order?id=' + coupon + '&vendor=' + user.email, requestOptions)
+    const confirm = useConfirm();
+
+    const handleClick = (event) => {
+        console.log(co);
+        console.log(event);
+        event.preventDefault();
+        if (user) {
+            confirm({description: 'You about to redeem coupon ' + co + '!'})
+                .then(async () => {
+                    await getData()
+                    console.log(info);
+                    console.log("I clicked Yes");
+                    setVerify(false);
+                    updateCoupon()
+                }).catch(() => {
+                console.log("It Failed");
+            });
+        }
+    };
+
+    const updateCoupon = () => {
+        console.log(info);
+
+        const requestOptions = {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: info
+        };
+        fetch('https://3edx7vfqsa.execute-api.ap-south-1.amazonaws.com/default/Siveals-update', requestOptions)
             .then(response => response.json())
             .then(data => {
+                    setInfo(data);
                     if (data.resp === "Invalid Coupon!") {
                         invalidCoupon = true;
                         setBooks("Invalid");
@@ -51,6 +76,40 @@ export default function VerifyCoupon() {
                     }
                 }
             );
+    }
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        setBooks(null);
+        getData();
+        setVerify(true);
+    };
+
+    const getData = () => {
+        const requestOptions = {
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'}
+        };
+        fetch('https://9p9gnbqc2j.execute-api.ap-south-1.amazonaws.com/siveals-read-order?id=' + coupon + '&vendor=' + user.email, requestOptions)
+            .then(response => response.json())
+            .then(data => {
+                    setInfo(data);
+                    if (data.resp === "Invalid Coupon!") {
+                        invalidCoupon = true;
+                        setBooks("Invalid");
+                    } else {
+                        data.valid ? setBooks("Available") : setBooks("Redeemed");
+                        setValid(data.valid)
+                    }
+                }
+            );
+    }
+    const handleClickOpen = () => {
+        this.setState({open: true});
+    };
+
+    const handleClose = () => {
+        this.setState({open: false});
     };
 
     return (
@@ -69,6 +128,10 @@ export default function VerifyCoupon() {
                         <Typography component="h1" variant="h5">
                             Verify Coupon
                         </Typography>
+                        <AlertDialog open={open}
+                                     handleClickOpen={handleClickOpen}
+                                     handleClose={handleClose}
+                        />
                         <Box component="form" noValidate sx={{mt: 1}}>
                             <TextField
                                 margin="normal"
@@ -81,20 +144,34 @@ export default function VerifyCoupon() {
                                 onChange={onCouponChange}
                             />
                             <Grid container component="main">
-                                <Grid item square sm={6} md={6}>
-                                    <Button type="submit"
-                                            variant="contained"
-                                            sx={{mt: 3, mb: 2}}
-                                            onClick={handleSubmit}
-                                    > Verify </Button>
-                                </Grid>
-                                <Grid item square sm={6} md={6}>
-                                    <Button type="submit"
-                                            variant="contained"
-                                            sx={{mt: 3, mb: 2}}
-                                            onClick={handleRedeem}
-                                    > Redeem </Button>
-                                </Grid>
+                                {verify ?
+                                    <div>
+                                        <Grid item square sm={12} md={12}>
+                                            <Button type="submit"
+                                                    fullWidth
+                                                    variant="contained"
+                                                    sx={{mt: 3, mb: 2}}
+                                                    onClick={handleSubmit}
+                                            > Verify </Button>
+
+                                            <Button type="submit"
+                                                    fullWidth
+                                                    variant="contained"
+                                                    sx={{mt: 3, mb: 2}}
+                                                    onClick={handleClick}
+                                            > Redeem </Button>
+                                        </Grid>
+                                    </div>
+                                    :
+                                    <Grid item square sm={12} md={12}>
+                                        <Button type="submit"
+                                                fullWidth
+                                                variant="contained"
+                                                sx={{mt: 3, mb: 2}}
+                                                onClick={handleSubmit}
+                                        > Verify </Button>
+                                    </Grid>
+                                }
                             </Grid>
                             {books === "Redeemed" &&
                             <Button fullWidth variant={'contained'} color='error' sx={{mt: 3, mb: 2}}>
