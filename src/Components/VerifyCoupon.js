@@ -44,7 +44,6 @@ export default function VerifyCoupon() {
         if (user) {
             confirm({description: 'You about to redeem coupon ' + co + '!'})
                 .then(async () => {
-                    await getData()
                     console.log(info);
                     console.log("I clicked Yes");
                     setVerify(false);
@@ -57,11 +56,11 @@ export default function VerifyCoupon() {
 
     const updateCoupon = () => {
         console.log(info);
-
+        info.email_id = user.email;
         const requestOptions = {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
-            body: info
+            body: JSON.stringify(info)
         };
         fetch('https://3edx7vfqsa.execute-api.ap-south-1.amazonaws.com/default/Siveals-update', requestOptions)
             .then(response => response.json())
@@ -96,9 +95,12 @@ export default function VerifyCoupon() {
                     setInfo(data);
                     if (data.resp === "Invalid Coupon!") {
                         invalidCoupon = true;
+                        setVerify(false);
                         setBooks("Invalid");
                     } else {
+                        data.valid ? setVerify(true) :setVerify(false);
                         data.valid ? setBooks("Available") : setBooks("Redeemed");
+
                         setValid(data.valid)
                     }
                 }
