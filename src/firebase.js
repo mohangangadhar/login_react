@@ -2,12 +2,13 @@ import firebase from "firebase/compat/app"
 import "firebase/compat/auth"
 
 const app = firebase.initializeApp({
-    apiKey: "AIzaSyCBC7EAQlyXLRAQHibCyfldHM-1yWfgpcM",
-    authDomain: "signal-clone-fe8ce.firebaseapp.com",
-    projectId: "signal-clone-fe8ce",
-    storageBucket: "signal-clone-fe8ce.appspot.com",
-    messagingSenderId: "570559533228",
-    appId: "1:570559533228:web:84a3bb19541ae00047cf09"
+    apiKey: "AIzaSyDh5Y93mslanrGuK-fEC-_kt0aGCO1njM4",
+    authDomain: "siveals.firebaseapp.com",
+    projectId: "siveals",
+    storageBucket: "siveals.appspot.com",
+    messagingSenderId: "907893628236",
+    appId: "1:907893628236:web:e88ad4762df3b21b98c3e9",
+    measurementId: "G-WXH3NWX07P"
 })
 
 export const auth = app.auth()
